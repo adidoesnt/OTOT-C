@@ -7,10 +7,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   cookieSession({
     name: "session",
-    secret: "COOKIE_SECRET",
+    secret: "COOKIE_SECRET", // generate secret and store in env variable
     httpOnly: true,
   })
 );
+
+// TODO: ADD ROLES AND PERMISSIONS
 
 const pokemon = [
   {

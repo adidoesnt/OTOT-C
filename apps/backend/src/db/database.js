@@ -1,17 +1,20 @@
+const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const userModel = require("./models/user");
 const { createUser, createSession } = require("./models/database");
 
 async function signup(req, res) {
   const { username, password } = req.body;
+  const salt = await bcryptjs.genSalt(16);
+  const hash = await bcryptjs.hash(password, salt);
   const newUser = await createUser({
     username,
-    password,
+    password: hash,
   });
   newUser.save(() => {
     return res
       .status(201)
-      .send({ message: "User was registered successfully!" });
+      .send({ message: "User registered" });
   });
 }
 
@@ -22,7 +25,12 @@ async function login(req, res) {
       username,
     })
     .exec((err, user) => {
+      const correctPassword = bcryptjs.compareSync(password, user.password);
+      if (!correctPassword) {
+        return res.status(401).send({ message: "Incorrect password" });
+      }
       const token = jwt.sign({ id: user._id }, "JWT_SECRET", {
+        // generate secret and store in env variable
         expiresIn: 86400, // 24 hours
       });
       req.session.token = token;
@@ -40,9 +48,7 @@ async function logout(req, res) {
   });
   newSession.save(() => {
     req.session = null;
-    return res
-      .status(201)
-      .send({ message: "Current session blacklisted" });
+    return res.status(201).send({ message: "Current session blacklisted" });
   });
 }
 
