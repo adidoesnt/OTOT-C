@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieSession = require("cookie-session");
+const jwt = require("jsonwebtoken");
 const { login, signup, logout } = require("./db/database");
 const app = express();
 app.use(express.urlencoded({ extended: true }));
@@ -26,12 +27,8 @@ const pokemon = [
   },
 ];
 
-app.get("/pokemon", (req, res) => {
-  if (req.session.token) {
-    return res.status(200).json(pokemon);
-  } else {
-    return res.status(403).send({ message: "You are not logged in!" });
-  }
+app.get("/pokemon", verifyToken, (req, res) => {
+  return res.json(pokemon);
 });
 
 app.post("/signup", async (req, res) => {
@@ -45,5 +42,23 @@ app.post("/login", async (req, res) => {
 app.post("/logout", async (req, res) => {
   await logout(req, res);
 });
+
+function verifyToken(req, res, next) {
+  const token = req.session.token;
+  if (!token) {
+    res.status(401).send({ message: "Unauthenticated" });
+    return;
+  } else {
+    jwt.verify(token, "JWT_SECRET", (err) => {
+      if (err) {
+        return res.status(403).send({
+          message: "Unauthorised",
+        });
+      } else {
+        next();
+      }
+    });
+  }
+}
 
 app.listen(3000);

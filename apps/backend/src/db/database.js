@@ -28,7 +28,7 @@ async function login(req, res) {
       req.session.token = token;
       return res.status(200).send({
         username: user.username,
-        id: user.id,
+        id: user._id,
         message: "You've been logged in!",
       });
     });
