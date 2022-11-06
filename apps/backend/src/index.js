@@ -29,6 +29,12 @@ const pokemon = [
   },
 ];
 
+app.get("/", verifyToken, (req, res) => {
+  return res.json({
+    message: 'Hello!'
+  });
+});
+
 app.get("/pokemon", verifyToken, (req, res) => {
   return res.json(pokemon);
 });

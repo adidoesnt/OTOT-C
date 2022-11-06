@@ -5,9 +5,7 @@
   "author": "Aditya Banerjee <aditya_banerjee@icloud.com>",
   "license": "MIT",
   "scripts": {
-    "backend-start": "",
-    "backend-dev": "",
-    "frontend-start": "",
-    "frontend-dev": ""
+    "backend-start": "node apps/backend/src/index.js",
+    "backend-dev": "nodemon apps/backend/src/index.js"
   }
 }
