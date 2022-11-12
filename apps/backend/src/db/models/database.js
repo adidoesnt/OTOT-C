@@ -1,6 +1,7 @@
 const UserModel = require('./user');
 const SessionModel = require('./session');
 const mongoose = require('mongoose');
+require('dotenv').config();
 const mongoDB = process.env.DB_URI;
 
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });

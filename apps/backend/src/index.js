@@ -3,19 +3,23 @@ const cookieSession = require("cookie-session");
 const jwt = require("jsonwebtoken");
 const { login, signup, logout } = require("./db/database");
 const app = express();
-require(dotenv).config()
+require('dotenv').config();
 const JWT_SECRET = process.env.JWT_SECRET;
+const COOKIE_SECRET = process.env.COOKIE_SECRET;
+
+const ROLES = {
+  ROOT: process.env.ROOT_KEY,
+  COMMON: undefined
+}
 
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cookieSession({
     name: "session",
-    secret: "COOKIE_SECRET", // generate secret and store in env variable
+    secret: COOKIE_SECRET,
     httpOnly: true,
   })
 );
-
-// TODO: ADD ROLES AND PERMISSIONS
 
 const pokemon = [
   {
@@ -35,6 +39,12 @@ const pokemon = [
 app.get("/", verifyToken, (req, res) => {
   return res.json({
     message: 'Hello!'
+  });
+});
+
+app.post("/root", verifyToken, verifyRoles([ROLES.ROOT]), (req, res) => {
+  return res.json({
+    message: 'Hello Root!'
   });
 });
 
@@ -62,13 +72,31 @@ function verifyToken(req, res, next) {
   } else {
     jwt.verify(token, JWT_SECRET, (err) => {
       if (err) {
-        return res.status(403).send({
-          message: "Unauthorised",
+        return res.status(401).send({
+          message: "Unauthenticated",
         });
       } else {
         next();
       }
     });
+  }
+}
+
+function verifyRoles(allowedRoles) {
+  return (req, res, next) => {
+    let key;
+    if(req.headers && req.headers['x-api-key']) {
+      key = req.headers['x-api-key']
+      let role = Object.keys(ROLES).find(ROLE => ROLES[ROLE] === key);
+      let found = allowedRoles.find(item => item === ROLES[role])
+      if(!found) {
+        return res.status(403).json({
+          message: 'Unauthorised'
+        })
+      } else {
+        next();
+      }
+    }
   }
 }
 
