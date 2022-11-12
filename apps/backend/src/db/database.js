@@ -30,7 +30,7 @@ async function login(req, res) {
         return res.status(401).send({ message: "Incorrect password" });
       }
       const token = jwt.sign({ id: user._id }, "JWT_SECRET", {
-        expiresIn: 20,
+        expiresIn: 3600,
       });
       req.session.token = token;
       return res.status(200).send({

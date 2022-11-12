@@ -3,6 +3,9 @@ const cookieSession = require("cookie-session");
 const jwt = require("jsonwebtoken");
 const { login, signup, logout } = require("./db/database");
 const app = express();
+require(dotenv).config()
+const JWT_SECRET = process.env.JWT_SECRET;
+
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cookieSession({
@@ -57,7 +60,7 @@ function verifyToken(req, res, next) {
     res.status(401).send({ message: "Unauthenticated" });
     return;
   } else {
-    jwt.verify(token, "JWT_SECRET", (err) => {
+    jwt.verify(token, JWT_SECRET, (err) => {
       if (err) {
         return res.status(403).send({
           message: "Unauthorised",
